@@ -1,3 +1,4 @@
 **/.idea
 **/tests/api_keys.json
 **/docs/source/stream.txt
+.env
