@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+requests-oauth2 = "*"
+
+[dev-packages]
+tox = "*"
+nose = "*"
+rednose = "*"
+mock = "*"
+coverage = "*"
+nose-exclude = "*"
+
+[requires]
+python_version = "3.12"
