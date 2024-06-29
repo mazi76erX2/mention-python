@@ -1,45 +1,37 @@
-def transform_date(date):
-    """Encodes date and timke into url format.
+from datetime import datetime
+from typing import Literal
 
-    :param date: Date and time.
-    :type date: str
-
-    :return: encoded date.
-    :rtype: str
+def transform_date(date: str) -> str:
+    """Encodes date and time into URL format.
+    
+    :param date: Date and time string in the format 'YYYY-MM-DD HH:MM'.
+    :return: Encoded date in the format 'YYYY-MM-DDTHH%3AMM%3A00.000%2B00%3A00'.
     """
-    index = date.find(' ')
-    date = (date[:index] + 'T' + date[index + 1:] +
-            ":00.12345+00:00").replace(':', '%3A').replace('+', '%2B')
-    return date
+    # Parse the input date string
+    dt = datetime.strptime(date, '%Y-%m-%d %H:%M')
+    
+    # Format the datetime object into the desired string format
+    formatted_date = dt.strftime('%Y-%m-%dT%H%%3A%M%%3A00.000%%2B00%%3A00')
+    
+    return formatted_date
 
-
-def transform_boolean(value):
-    """Transfroms boolean to `1` or `0`.
-
+def transform_boolean(value: bool) -> str:
+    """Transforms boolean to `1` or `0`.
+    
     :param value: Boolean value.
-    :type value: boolean
-
-    :return: number representation of boolean `1` or `0`.
-    :rtype: str
+    :return: Number representation of boolean `1` or `0`.
     """
-    if value:
-        return '1'
-    else:
-        return '0'
+    return '1' if value else '0'
 
-
-def transform_tone(tone):
+def transform_tone(tone: Literal['negative', 'neutral', 'positive']) -> str:
     """Transforms keyword `negative`, `neutral` or `positive` into `-1`, `0` or `1`.
-
-    :param tone: string representation of tone.
-    :type tone: str
-
-    :return: number representation of tone.
-    :rtype: str
+    
+    :param tone: String representation of tone.
+    :return: Number representation of tone.
     """
-    if 'negative':
+    if tone == 'negative':
         return '-1'
-    elif 'neutral':
+    elif tone == 'neutral':
         return '0'
     else:
         return '1'
