@@ -1,4 +1,5 @@
 """This module contains the `AppDataAPI` class that retrieves useful details"""
+
 from .base import Mention
 
 

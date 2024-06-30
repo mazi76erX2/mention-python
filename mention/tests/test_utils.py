@@ -1,4 +1,5 @@
 """Tests for the utils module."""
+
 from typing import Literal
 
 import pytest
@@ -13,7 +14,7 @@ def test_transform_date():
 
 @pytest.mark.parametrize("input_value, expected", [(True, "1"), (False, "0")])
 def test_transform_boolean(input_value: bool, expected: str):
-    """ Test the transform_boolean function."""
+    """Test the transform_boolean function."""
     result = utils.transform_boolean(input_value)
     assert result == expected
 

@@ -1,4 +1,5 @@
 """The base class for all of the Mention API calls."""
+
 from abc import ABC, abstractmethod
 from typing import Any
 
