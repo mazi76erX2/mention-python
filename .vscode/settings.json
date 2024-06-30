@@ -9,5 +9,13 @@
         "queryd",
         "Queryd",
         "rtype"
-    ]
+    ],
+    "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.isort": "explicit",
+       }
+     },
+   "editor.defaultFormatter": "ms-python.black-formatter",
+   "isort.args": ["--profile", "black"],
+   "mypy-type-checker.importStrategy": "fromEnvironment",
 }
