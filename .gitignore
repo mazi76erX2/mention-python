@@ -172,3 +172,4 @@ cython_debug/
 .idea/
 codealike.json
 mention/api/base_old.py
+mention/tests/test_base_old.py
