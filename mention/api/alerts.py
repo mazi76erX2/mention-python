@@ -145,3 +145,31 @@ class FetchAnAlertAPI(Mention):
         """
         end_url = f"/accounts/{self.account_id}/alerts/{self.alert_id}"
         return f"{self._base_url}{end_url}"
+
+
+class FetchAlertsAPI(Mention):
+    """Fetch a list of all alerts for a given account."""
+
+    def __init__(self, oauth: OAuth2Session, account_id: str):
+        super().__init__(oauth)
+        self.account_id = account_id
+
+    def params(self) -> Dict[str, str]:
+        """Parameters used in the url of the API call."""
+        return {"account_id": self.account_id}
+
+    def url(self) -> str:
+        """The concatenation of the `base_url` and `end_url` that make up the
+        resultant url.
+        """
+        return f"{self._base_url}/accounts/{self.account_id}/alerts"
+
+    def query(self) -> Dict[str, Any]:
+        """Fetch and return the list of alerts as JSON."""
+        try:
+            response = self.oauth.get(self.url())
+            response.raise_for_status()
+            return response.json()
+        except HTTPError as e:
+            print(f"HTTP error occurred: {e}")
+            return {}
