@@ -164,7 +164,8 @@ class FetchAlertsAPI(Mention):
 
 
 class UpdateAnAlertAPI(Mention):
-    """Modifies an existing alert, usually to update the criteria and to improve the search's efficiency.
+    """Modifies an existing alert, usually to update the criteria and 
+    to improve the search's efficiency.
 
     :param access_token: Mention API `access_token`
     :param account_id: ID of the account.
@@ -266,6 +267,80 @@ class UpdateAnAlertAPI(Mention):
         """Update the alert and return the response as JSON."""
         try:
             response = self.oauth.put(self.url(), json=self.data())
+            response.raise_for_status()
+            return response.json()
+        except HTTPError as e:
+            print(f"HTTP error occurred: {e}")
+            return {}
+
+
+class PauseAnAlertAPI(Mention):
+    """Pauses an existing alert."""
+
+    def __init__(
+        self,
+        oauth: OAuth2Session,
+        account_id: str,
+        alert_id: str
+    ):
+        super().__init__(oauth)
+        self.account_id = account_id
+        self.alert_id = alert_id
+
+    def params(self) -> Dict[str, str]:
+        """Parameters used in the url of the API call."""
+        return {
+            "account_id": self.account_id,
+            "alert_id": self.alert_id
+        }
+
+    def url(self) -> str:
+        """The concatenation of the `base_url` and `end_url` that make up the
+        resultant url.
+        """
+        return f"{self._base_url}/accounts/{self.account_id}/alerts/{self.alert_id}/pause"
+
+    def query(self) -> Dict[str, Any]:
+        """Pause the alert and return the response as JSON."""
+        try:
+            response = self.oauth.post(self.url())
+            response.raise_for_status()
+            return response.json()
+        except HTTPError as e:
+            print(f"HTTP error occurred: {e}")
+            return {}
+
+
+class UnpauseAnAlertAPI(Mention):
+    """Unpauses an existing alert."""
+
+    def __init__(
+        self,
+        oauth: OAuth2Session,
+        account_id: str,
+        alert_id: str
+    ):
+        super().__init__(oauth)
+        self.account_id = account_id
+        self.alert_id = alert_id
+
+    def params(self) -> Dict[str, str]:
+        """Parameters used in the url of the API call."""
+        return {
+            "account_id": self.account_id,
+            "alert_id": self.alert_id
+        }
+
+    def url(self) -> str:
+        """The concatenation of the `base_url` and `end_url` that make up the
+        resultant url.
+        """
+        return f"{self._base_url}/accounts/{self.account_id}/alerts/{self.alert_id}/unpause"
+
+    def query(self) -> Dict[str, Any]:
+        """Unpause the alert and return the response as JSON."""
+        try:
+            response = self.oauth.post(self.url())
             response.raise_for_status()
             return response.json()
         except HTTPError as e:
