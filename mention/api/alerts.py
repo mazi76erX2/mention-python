@@ -1,5 +1,5 @@
 """API calls related to alerts."""
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from requests.exceptions import HTTPError
 from requests_oauthlib import OAuth2Session
@@ -45,7 +45,7 @@ class CreateAnAlertAPI(Mention):
     :param blocked_sites: A list of blocked sites from which you
      don't want mentions to be tracked.
     :param noise_detection: Enables noise detection.
-    :param reviews_pages: List of reviews pages.
+    :param reviews_pages: list of reviews pages.
     """
 
     def __init__(
@@ -53,13 +53,13 @@ class CreateAnAlertAPI(Mention):
         oauth: OAuth2Session,
         account_id: str,
         name: str,
-        query: Dict[str, Any],
-        languages: List[str],
-        countries: Optional[List[str]] = None,
-        sources: Optional[List[str]] = None,
-        blocked_sites: Optional[List[str]] = None,
+        query: dict[str, Any],
+        languages: list[str],
+        countries: Optional[list[str]] = None,
+        sources: Optional[list[str]] = None,
+        blocked_sites: Optional[list[str]] = None,
         noise_detection: Optional[bool] = None,
-        reviews_pages: Optional[List[str]] = None,
+        reviews_pages: Optional[list[str]] = None,
     ):
         super().__init__(oauth)
         self.account_id = account_id
@@ -72,7 +72,7 @@ class CreateAnAlertAPI(Mention):
         self.noise_detection = noise_detection
         self.reviews_pages = reviews_pages
 
-    def params(self) -> Dict[str, str]:
+    def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
         return {"account_id": self.account_id}
 
@@ -82,7 +82,7 @@ class CreateAnAlertAPI(Mention):
         """
         return f"{self._base_url}/accounts/{self.account_id}/alerts"
 
-    def data(self) -> Dict[str, Any]:
+    def data(self) -> dict[str, Any]:
         """Parameters passed to the API containing the details to create a new alert."""
         data = {
             "name": self.name,
@@ -101,7 +101,7 @@ class CreateAnAlertAPI(Mention):
             data["reviews_pages"] = self.reviews_pages
         return data
 
-    def query(self) -> Dict[str, Any]:
+    def query(self) -> dict[str, Any]:
         """The request that creates a new alert and returns the response as JSON."""
         try:
             response = self.oauth.post(self.url(), json=self.data())
@@ -142,7 +142,7 @@ class FetchAlertsAPI(Mention):
         super().__init__(oauth)
         self.account_id = account_id
 
-    def params(self) -> Dict[str, str]:
+    def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
         return {"account_id": self.account_id}
 
@@ -152,7 +152,7 @@ class FetchAlertsAPI(Mention):
         """
         return f"{self._base_url}/accounts/{self.account_id}/alerts"
 
-    def query(self) -> Dict[str, Any]:
+    def query(self) -> dict[str, Any]:
         """Fetch and return the list of alerts as JSON."""
         try:
             response = self.oauth.get(self.url())
@@ -202,7 +202,7 @@ class UpdateAnAlertAPI(Mention):
     :param blocked_sites: A list of blocked sites from which you
      don't want mentions to be tracked.
     :param noise_detection: Enables noise detection.
-    :param reviews_pages: List of reviews pages.
+    :param reviews_pages: list of reviews pages.
     """
 
     def __init__(
@@ -211,13 +211,13 @@ class UpdateAnAlertAPI(Mention):
         account_id: str,
         alert_id: str,
         name: str,
-        query: Dict[str, Any],
-        languages: List[str],
-        countries: Optional[List[str]] = None,
-        sources: Optional[List[str]] = None,
-        blocked_sites: Optional[List[str]] = None,
+        query: dict[str, Any],
+        languages: list[str],
+        countries: Optional[list[str]] = None,
+        sources: Optional[list[str]] = None,
+        blocked_sites: Optional[list[str]] = None,
         noise_detection: Optional[bool] = None,
-        reviews_pages: Optional[List[str]] = None
+        reviews_pages: Optional[list[str]] = None
     ):
         super().__init__(oauth)
         self.account_id = account_id
@@ -231,14 +231,14 @@ class UpdateAnAlertAPI(Mention):
         self.noise_detection = noise_detection
         self.reviews_pages = reviews_pages
 
-    def params(self) -> Dict[str, str]:
+    def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
         return {
             "account_id": self.account_id,
             "alert_id": self.alert_id
         }
 
-    def data(self) -> Dict[str, Any]:
+    def data(self) -> dict[str, Any]:
         """Parameters passed to the API containing the details to update an alert."""
         data = {
             "name": self.name,
@@ -263,7 +263,7 @@ class UpdateAnAlertAPI(Mention):
         """
         return f"{self._base_url}/accounts/{self.account_id}/alerts/{self.alert_id}"
 
-    def query(self) -> Dict[str, Any]:
+    def query(self) -> dict[str, Any]:
         """Update the alert and return the response as JSON."""
         try:
             response = self.oauth.put(self.url(), json=self.data())
@@ -287,7 +287,7 @@ class PauseAnAlertAPI(Mention):
         self.account_id = account_id
         self.alert_id = alert_id
 
-    def params(self) -> Dict[str, str]:
+    def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
         return {
             "account_id": self.account_id,
@@ -300,7 +300,7 @@ class PauseAnAlertAPI(Mention):
         """
         return f"{self._base_url}/accounts/{self.account_id}/alerts/{self.alert_id}/pause"
 
-    def query(self) -> Dict[str, Any]:
+    def query(self) -> dict[str, Any]:
         """Pause the alert and return the response as JSON."""
         try:
             response = self.oauth.post(self.url())
@@ -324,7 +324,7 @@ class UnpauseAnAlertAPI(Mention):
         self.account_id = account_id
         self.alert_id = alert_id
 
-    def params(self) -> Dict[str, str]:
+    def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
         return {
             "account_id": self.account_id,
@@ -337,7 +337,7 @@ class UnpauseAnAlertAPI(Mention):
         """
         return f"{self._base_url}/accounts/{self.account_id}/alerts/{self.alert_id}/unpause"
 
-    def query(self) -> Dict[str, Any]:
+    def query(self) -> dict[str, Any]:
         """Unpause the alert and return the response as JSON."""
         try:
             response = self.oauth.post(self.url())
