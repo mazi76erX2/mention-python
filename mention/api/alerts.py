@@ -1,5 +1,4 @@
 """API calls related to alerts."""
-import json
 from typing import Any, Dict, List, Optional
 
 from requests.exceptions import HTTPError
@@ -252,7 +251,7 @@ class UpdateAnAlertAPI(Mention):
         if self.blocked_sites:
             data["blocked_sites"] = self.blocked_sites
         if self.noise_detection is not None:
-            data["noise_detection"] = self.noise_detection
+            data["noise_detection"] = str(self.noise_detection).lower()
         if self.reviews_pages:
             data["reviews_pages"] = self.reviews_pages
         return data
