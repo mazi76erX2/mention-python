@@ -1,4 +1,4 @@
-"""Allerts tests"""
+"""Alerts tests"""
 from typing import Any, Dict
 import pytest
 from unittest.mock import MagicMock
