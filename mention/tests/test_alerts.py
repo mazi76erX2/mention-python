@@ -1,9 +1,11 @@
 """Alerts tests"""
+
 from typing import Any, Dict
-import pytest
 from unittest.mock import MagicMock
-from requests_oauthlib import OAuth2Session
+
+import pytest
 from requests.exceptions import HTTPError
+from requests_oauthlib import OAuth2Session
 
 from ..api.alerts import CreateAnAlertAPI
 
@@ -183,6 +185,7 @@ def test_create_alert_empty_query(
 
     # Check if the error was printed
     assert response == {}
+
 
 def test_create_alert_invalid_language(
     mock_oauth_session: OAuth2Session, basic_alert_data: Dict[str, Any]

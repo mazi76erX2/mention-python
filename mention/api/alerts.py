@@ -1,4 +1,5 @@
 """API calls related to alerts."""
+
 from typing import Any, Optional
 
 from requests.exceptions import HTTPError
@@ -164,7 +165,7 @@ class FetchAlertsAPI(Mention):
 
 
 class UpdateAnAlertAPI(Mention):
-    """Modifies an existing alert, usually to update the criteria and 
+    """Modifies an existing alert, usually to update the criteria and
     to improve the search's efficiency.
 
     :param access_token: Mention API `access_token`
@@ -217,7 +218,7 @@ class UpdateAnAlertAPI(Mention):
         sources: Optional[list[str]] = None,
         blocked_sites: Optional[list[str]] = None,
         noise_detection: Optional[bool] = None,
-        reviews_pages: Optional[list[str]] = None
+        reviews_pages: Optional[list[str]] = None,
     ):
         super().__init__(oauth)
         self.account_id = account_id
@@ -233,17 +234,14 @@ class UpdateAnAlertAPI(Mention):
 
     def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
-        return {
-            "account_id": self.account_id,
-            "alert_id": self.alert_id
-        }
+        return {"account_id": self.account_id, "alert_id": self.alert_id}
 
     def data(self) -> dict[str, Any]:
         """Parameters passed to the API containing the details to update an alert."""
         data = {
             "name": self.name,
             "query": self.query_data,
-            "languages": self.languages
+            "languages": self.languages,
         }
         if self.countries:
             data["countries"] = self.countries
@@ -277,28 +275,22 @@ class UpdateAnAlertAPI(Mention):
 class PauseAnAlertAPI(Mention):
     """Pauses an existing alert."""
 
-    def __init__(
-        self,
-        oauth: OAuth2Session,
-        account_id: str,
-        alert_id: str
-    ):
+    def __init__(self, oauth: OAuth2Session, account_id: str, alert_id: str):
         super().__init__(oauth)
         self.account_id = account_id
         self.alert_id = alert_id
 
     def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
-        return {
-            "account_id": self.account_id,
-            "alert_id": self.alert_id
-        }
+        return {"account_id": self.account_id, "alert_id": self.alert_id}
 
     def url(self) -> str:
         """The concatenation of the `base_url` and `end_url` that make up the
         resultant url.
         """
-        return f"{self._base_url}/accounts/{self.account_id}/alerts/{self.alert_id}/pause"
+        return (
+            f"{self._base_url}/accounts/{self.account_id}/alerts/{self.alert_id}/pause"
+        )
 
     def query(self) -> dict[str, Any]:
         """Pause the alert and return the response as JSON."""
@@ -314,22 +306,14 @@ class PauseAnAlertAPI(Mention):
 class UnpauseAnAlertAPI(Mention):
     """Unpauses an existing alert."""
 
-    def __init__(
-        self,
-        oauth: OAuth2Session,
-        account_id: str,
-        alert_id: str
-    ):
+    def __init__(self, oauth: OAuth2Session, account_id: str, alert_id: str):
         super().__init__(oauth)
         self.account_id = account_id
         self.alert_id = alert_id
 
     def params(self) -> dict[str, str]:
         """Parameters used in the url of the API call."""
-        return {
-            "account_id": self.account_id,
-            "alert_id": self.alert_id
-        }
+        return {"account_id": self.account_id, "alert_id": self.alert_id}
 
     def url(self) -> str:
         """The concatenation of the `base_url` and `end_url` that make up the
