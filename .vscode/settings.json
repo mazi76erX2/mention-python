@@ -17,5 +17,8 @@
      },
    "editor.defaultFormatter": "ms-python.black-formatter",
    "isort.args": ["--profile", "black"],
-   "mypy-type-checker.importStrategy": "fromEnvironment",
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "pylint.args": [
+    "--rcfile=setup.cfg"
+  ],
 }
