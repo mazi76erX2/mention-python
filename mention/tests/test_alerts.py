@@ -85,7 +85,6 @@ class TestCreateAnAlertAPI:
 
         assert response == {"alert_id": "12345"}
 
-
     def test_create_advanced_alert_success(
         self, mock_oauth_session: OAuth2Session, advanced_alert_data: Dict[str, Any]
     ) -> None:
@@ -111,7 +110,6 @@ class TestCreateAnAlertAPI:
         )
 
         assert response == {"alert_id": "12345"}
-
 
     def test_create_alert_with_optional_params(
         self, mock_oauth_session: OAuth2Session, basic_alert_data: Dict[str, Any]
@@ -144,7 +142,6 @@ class TestCreateAnAlertAPI:
         )
         assert response == {"alert_id": "12345"}
 
-
     def test_create_alert_http_error(
         self, mock_oauth_session: OAuth2Session, basic_alert_data: Dict[str, Any]
     ) -> None:
@@ -171,7 +168,6 @@ class TestCreateAnAlertAPI:
         response = api.query()
 
         assert response == {}  # Expect an empty dictionary on error
-
 
     def test_create_alert_invalid_language(
         self, mock_oauth_session: OAuth2Session, basic_alert_data: Dict[str, Any]
