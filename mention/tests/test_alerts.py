@@ -4,7 +4,7 @@ from typing import Any, Dict
 from unittest.mock import MagicMock
 
 import pytest
-from requests.exceptions import HTTPError # type: ignore
+from requests.exceptions import HTTPError  # type: ignore
 from requests_oauthlib import OAuth2Session
 
 from ..api.alerts import CreateAnAlertAPI

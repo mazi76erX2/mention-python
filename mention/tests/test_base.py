@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from requests.exceptions import HTTPError # mypy: ignore
+from requests.exceptions import HTTPError  # mypy: ignore
 from requests_oauthlib import OAuth2Session
 
 from ..api.base import Mention, create_oauth_session
