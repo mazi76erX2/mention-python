@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
 from mention.models.base import MentionBaseModel, TimestampMixin
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class AccountQuota(MentionBaseModel):
@@ -26,19 +29,8 @@ class AccountStats(MentionBaseModel):
     unread_mentions_count: int = 0
 
 
-class Account(MentionBaseModel, TimestampMixin):
-    """
-    Represents a Mention account.
-
-    Attributes:
-        id: Unique account identifier.
-        name: Account name.
-        email: Account email address.
-        company: Company name.
-        plan: Subscription plan name.
-        quota: Account quotas and limits.
-        stats: Account usage statistics.
-    """
+class Account(TimestampMixin, MentionBaseModel):
+    """Represents a Mention account."""
 
     id: str
     name: str | None = None

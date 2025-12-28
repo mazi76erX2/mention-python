@@ -1,8 +1,5 @@
 """
 Main client for the Mention API.
-
-This module provides a typed, modern Python client for interacting with
-the Mention API using httpx and pydantic.
 """
 
 from __future__ import annotations
@@ -13,7 +10,6 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 import httpx
 
-from mention.config import MentionConfig
 from mention.exceptions import (
     MentionAPIError,
     MentionAuthError,
@@ -34,6 +30,8 @@ from mention.models import (
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from mention.config import MentionConfig
 
 T = TypeVar("T")
 

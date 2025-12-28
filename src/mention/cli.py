@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime
 from typing import NoReturn
 
 from mention.client import MentionClient
@@ -160,7 +159,7 @@ def cmd_mentions_list(args: argparse.Namespace) -> None:
 def cmd_mentions_get(args: argparse.Namespace) -> None:
     """Get a single mention."""
     account_id = get_account_id(args)
-        with get_client() as client:
+    with get_client() as client:
         mention = client.get_mention(account_id, args.alert_id, args.mention_id)
         output_json(mention)
 
@@ -177,7 +176,9 @@ def cmd_mentions_curate(args: argparse.Namespace) -> None:
     )
 
     with get_client() as client:
-        mention = client.curate_mention(account_id, args.alert_id, args.mention_id, request)
+        mention = client.curate_mention(
+            account_id, args.alert_id, args.mention_id, request
+        )
         output_json(mention)
         print(f"\n✓ Mention {args.mention_id} updated", file=sys.stderr)
 
@@ -187,7 +188,9 @@ def cmd_mentions_mark_read(args: argparse.Namespace) -> None:
     account_id = get_account_id(args)
     with get_client() as client:
         client.mark_all_mentions_read(account_id, args.alert_id)
-        print(f"✓ All mentions for alert {args.alert_id} marked as read", file=sys.stderr)
+        print(
+            f"✓ All mentions for alert {args.alert_id} marked as read", file=sys.stderr
+        )
 
 
 def cmd_mentions_stream(args: argparse.Namespace) -> None:
@@ -266,7 +269,9 @@ Examples:
 
     # --- alerts commands ---
     alerts_parser = subparsers.add_parser("alerts", help="Manage alerts")
-    alerts_subparsers = alerts_parser.add_subparsers(dest="alerts_command", required=True)
+    alerts_subparsers = alerts_parser.add_subparsers(
+        dest="alerts_command", required=True
+    )
 
     # alerts list
     alerts_list = alerts_subparsers.add_parser("list", help="List all alerts")
@@ -312,7 +317,9 @@ Examples:
 
     # --- mentions commands ---
     mentions_parser = subparsers.add_parser("mentions", help="Manage mentions")
-    mentions_subparsers = mentions_parser.add_subparsers(dest="mentions_command", required=True)
+    mentions_subparsers = mentions_parser.add_subparsers(
+        dest="mentions_command", required=True
+    )
 
     # mentions list
     mentions_list = mentions_subparsers.add_parser("list", help="List mentions")

@@ -21,27 +21,22 @@ from mention.models.mentions import (
 )
 
 __all__ = [
-    # Base
     "APIResponse",
-    "PaginatedResponse",
-    "PaginationLinks",
-    # Account
     "Account",
     "AccountQuota",
     "AccountStats",
-    # Alerts
     "Alert",
     "AlertQuery",
     "AlertsResponse",
-    "CreateAlertRequest",
-    "UpdateAlertRequest",
-    # App
     "AppData",
-    "Source",
-    # Mentions
     "Author",
+    "CreateAlertRequest",
     "CurateMentionRequest",
     "Mention",
     "MentionsResponse",
+    "PaginatedResponse",
+    "PaginationLinks",
+    "Source",
     "Tag",
+    "UpdateAlertRequest",
 ]

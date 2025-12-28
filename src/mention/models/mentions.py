@@ -1,145 +1,107 @@
-"""Alert-related models for the Mention API."""
+"""Mention-related models for the Mention API."""
 
 from __future__ import annotations
 
-from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import Field, field_validator
 
 from mention.models.base import MentionBaseModel, PaginatedResponse, TimestampMixin
 
-
-class QueryType(str, Enum):
-    """Alert query types."""
-
-    BASIC = "basic"
-    ADVANCED = "advanced"
-    BOOLEAN = "boolean"
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
-class AlertQuery(MentionBaseModel):
-    """
-    Alert query configuration.
+class Tone(str, Enum):
+    """Mention sentiment/tone values."""
 
-    Attributes:
-        type: Query type (basic, advanced, boolean).
-        included_keywords: Keywords to include in search.
-        excluded_keywords: Keywords to exclude from search.
-        required_keywords: Keywords that must be present.
-        should_belong_to_owner: Filter by content ownership.
-    """
-
-    type: QueryType = QueryType.BASIC
-    included_keywords: list[str] = Field(default_factory=list)
-    excluded_keywords: list[str] = Field(default_factory=list)
-    required_keywords: list[str] = Field(default_factory=list)
-    should_belong_to_owner: bool | None = None
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
 
 
-class AlertSource(str, Enum):
-    """Available alert sources."""
+class Author(MentionBaseModel):
+    """Author of a mention."""
 
-    WEB = "web"
-    TWITTER = "twitter"
-    FACEBOOK = "facebook"
-    INSTAGRAM = "instagram"
-    YOUTUBE = "youtube"
-    REDDIT = "reddit"
-    NEWS = "news"
-    BLOG = "blog"
-    FORUM = "forum"
-    REVIEW = "review"
+    id: str | None = None
+    name: str | None = None
+    username: str | None = None
+    profile_url: str | None = None
+    avatar_url: str | None = None
+    followers_count: int | None = None
+    following_count: int | None = None
+    influence_score: float | None = None
 
 
-class Alert(MentionBaseModel, TimestampMixin):
-    """
-    Represents a Mention alert.
-
-    Attributes:
-        id: Unique alert identifier.
-        name: Alert name.
-        query: Query configuration for this alert.
-        languages: List of language codes to monitor.
-        countries: List of country codes to monitor.
-        sources: List of sources to monitor.
-        noise_detection: Whether noise detection is enabled.
-        sentiment_analysis: Whether sentiment analysis is enabled.
-    """
+class Tag(MentionBaseModel):
+    """Tag associated with a mention."""
 
     id: str
     name: str
-    query: AlertQuery
-    languages: list[str] = Field(default_factory=list)
-    countries: list[str] = Field(default_factory=list)
-    sources: list[str] = Field(default_factory=list)
-    noise_detection: bool = True
-    sentiment_analysis: bool = True
-    mentions_count: int = 0
-    unread_mentions_count: int = 0
-    shares_count: int = 0
-    followers_count: int = 0
-    reach: int = 0
-    last_mention_at: datetime | None = None
+    color: str | None = None
 
-    @field_validator("sources", mode="before")
+
+class Mention(TimestampMixin, MentionBaseModel):
+    """Represents a single mention from the Mention API."""
+
+    id: str
+    title: str | None = None
+    description: str | None = None
+    description_short: str | None = None
+    original_url: str | None = None
+    source_name: str | None = None
+    source_type: str | None = None
+    tone: Tone | None = None
+    author: Author | None = None
+    tags: list[Tag] = Field(default_factory=list)
+    favorite: bool = False
+    read: bool = False
+    trashed: bool = False
+    published_at: datetime | None = None
+    reach: int | None = None
+    engagement: dict[str, int] | None = None
+    language: str | None = None
+    country: str | None = None
+    image_url: str | None = None
+    video_url: str | None = None
+
+    @field_validator("tone", mode="before")
     @classmethod
-    def parse_sources(cls, v: Any) -> list[str]:
-        """Parse sources from various formats."""
+    def parse_tone(cls, v: Any) -> Tone | None:
+        """Parse tone from string or int."""
+        if v is None:
+            return None
+        if isinstance(v, Tone):
+            return v
         if isinstance(v, str):
-            return [v]
-        if isinstance(v, list):
-            return [str(s) for s in v]
-        return []
+            try:
+                return Tone(v.lower())
+            except ValueError:
+                return None
+        if isinstance(v, int):
+            mapping = {1: Tone.POSITIVE, 0: Tone.NEUTRAL, -1: Tone.NEGATIVE}
+            return mapping.get(v)
+        return None
 
 
-class AlertsResponse(PaginatedResponse[Alert]):
-    """Response containing a list of alerts."""
+class MentionsResponse(PaginatedResponse[Mention]):
+    """Response containing a list of mentions."""
 
-    alerts: list[Alert] = Field(default_factory=list)
+    mentions: list[Mention] = Field(default_factory=list)
 
     @property
-    def items(self) -> list[Alert]:
-        """Alias for alerts to support generic pagination."""
-        return self.alerts
+    def items(self) -> list[Mention]:
+        """Alias for mentions to support generic pagination."""
+        return self.mentions
 
 
-class CreateAlertRequest(MentionBaseModel):
-    """Request body for creating a new alert."""
+class CurateMentionRequest(MentionBaseModel):
+    """Request body for curating (updating) a mention."""
 
-    name: str
-    query: AlertQuery
-    languages: list[str] = Field(default_factory=lambda: ["en"])
-    countries: list[str] = Field(default_factory=list)
-    sources: list[str] = Field(default_factory=lambda: ["web"])
-    noise_detection: bool = True
-    sentiment_analysis: bool = True
-
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, v: str) -> str:
-        """Validate alert name is not empty."""
-        if not v or not v.strip():
-            raise ValueError("Alert name cannot be empty")
-        return v.strip()
-
-    @field_validator("languages")
-    @classmethod
-    def validate_languages(cls, v: list[str]) -> list[str]:
-        """Ensure at least one language is specified."""
-        if not v:
-            return ["en"]
-        return v
-
-
-class UpdateAlertRequest(MentionBaseModel):
-    """Request body for updating an existing alert."""
-
-    name: str | None = None
-    query: AlertQuery | None = None
-    languages: list[str] | None = None
-    countries: list[str] | None = None
-    sources: list[str] | None = None
-    noise_detection: bool | None = None
-    sentiment_analysis: bool | None = None
+    favorite: bool | None = None
+    read: bool | None = None
+    trashed: bool | None = None
+    tone: Tone | None = None
+    tags: list[str] | None = None
+    folder: str | None = None

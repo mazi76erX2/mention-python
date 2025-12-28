@@ -4,24 +4,18 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from dotenv import load_dotenv
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass(frozen=True, slots=True)
 class MentionConfig:
     """
     Configuration for the Mention API client.
-
-    Attributes:
-        access_token: OAuth2 access token for authentication.
-        account_id: Default account ID to use for API calls.
-        base_url: Base URL for the Mention API.
-        timeout: Request timeout in seconds.
-        max_retries: Maximum number of retry attempts for failed requests.
-        retry_delay: Base delay between retries in seconds.
     """
 
     access_token: str
@@ -41,24 +35,6 @@ class MentionConfig:
     ) -> MentionConfig:
         """
         Create configuration from environment variables.
-
-        Args:
-            env_file: Path to .env file (optional).
-            prefix: Prefix for environment variables (default: "MENTION_").
-
-        Returns:
-            MentionConfig instance.
-
-        Raises:
-            ValueError: If required environment variables are missing.
-
-        Environment variables:
-            - {prefix}ACCESS_TOKEN: OAuth2 access token (required)
-            - {prefix}ACCOUNT_ID: Default account ID
-            - {prefix}BASE_URL: API base URL
-            - {prefix}TIMEOUT: Request timeout
-            - {prefix}MAX_RETRIES: Maximum retry attempts
-            - {prefix}RETRY_DELAY: Delay between retries
         """
         if env_file:
             load_dotenv(env_file)
@@ -71,9 +47,8 @@ class MentionConfig:
 
         access_token = get_var("ACCESS_TOKEN")
         if not access_token:
-            raise ValueError(
-                f"Missing required environment variable: {prefix}ACCESS_TOKEN or ACCESS_TOKEN"
-            )
+            msg = f"Missing required environment variable: {prefix}ACCESS_TOKEN or ACCESS_TOKEN"
+            raise ValueError(msg)
 
         return cls(
             access_token=access_token,

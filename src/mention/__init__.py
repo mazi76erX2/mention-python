@@ -33,30 +33,26 @@ from mention.models import (
     Tag,
 )
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __author__ = "Xolani Mazibuko"
 __email__ = "mazi76erx@gmail.com"
 
 __all__ = [
-    # Client
-    "MentionClient",
-    # Config
-    "MentionConfig",
-    # Exceptions
-    "MentionError",
-    "MentionAPIError",
-    "MentionAuthError",
-    "MentionConnectionError",
-    "MentionNotFoundError",
-    "MentionRateLimitError",
-    "MentionValidationError",
-    # Models
     "Account",
     "Alert",
     "AlertQuery",
     "AlertsResponse",
     "AppData",
     "Mention",
+    "MentionAPIError",
+    "MentionAuthError",
+    "MentionClient",
+    "MentionConfig",
+    "MentionConnectionError",
+    "MentionError",
+    "MentionNotFoundError",
+    "MentionRateLimitError",
     "MentionsResponse",
+    "MentionValidationError",
     "Tag",
 ]

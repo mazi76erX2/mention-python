@@ -15,7 +15,7 @@ class MentionBaseModel(BaseModel):
         populate_by_name=True,
         use_enum_values=True,
         validate_assignment=True,
-        extra="allow",  # Allow extra fields for forward compatibility
+        extra="allow",
     )
 
 
@@ -55,7 +55,8 @@ class PaginatedResponse(MentionBaseModel, Generic[T]):
         return bool(self.links and self.links.more)
 
 
-class TimestampMixin(MentionBaseModel):
+# Note: No inheritance - just defines fields
+class TimestampMixin:
     """Mixin for models with timestamp fields."""
 
     created_at: datetime | None = None
@@ -69,12 +70,10 @@ def parse_datetime(value: Any) -> datetime | None:
     if isinstance(value, datetime):
         return value
     if isinstance(value, str):
-        # Try ISO format first
         try:
             return datetime.fromisoformat(value.replace("Z", "+00:00"))
         except ValueError:
             pass
-        # Try other common formats
         for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"]:
             try:
                 return datetime.strptime(value, fmt)

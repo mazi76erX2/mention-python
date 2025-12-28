@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import Field, field_validator
 
 from mention.models.base import MentionBaseModel, PaginatedResponse, TimestampMixin
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class QueryType(str, Enum):
@@ -20,16 +22,7 @@ class QueryType(str, Enum):
 
 
 class AlertQuery(MentionBaseModel):
-    """
-    Alert query configuration.
-
-    Attributes:
-        type: Query type (basic, advanced, boolean).
-        included_keywords: Keywords to include in search.
-        excluded_keywords: Keywords to exclude from search.
-        required_keywords: Keywords that must be present.
-        should_belong_to_owner: Filter by content ownership.
-    """
+    """Alert query configuration."""
 
     type: QueryType = QueryType.BASIC
     included_keywords: list[str] = Field(default_factory=list)
@@ -53,20 +46,8 @@ class AlertSource(str, Enum):
     REVIEW = "review"
 
 
-class Alert(MentionBaseModel, TimestampMixin):
-    """
-    Represents a Mention alert.
-
-    Attributes:
-        id: Unique alert identifier.
-        name: Alert name.
-        query: Query configuration for this alert.
-        languages: List of language codes to monitor.
-        countries: List of country codes to monitor.
-        sources: List of sources to monitor.
-        noise_detection: Whether noise detection is enabled.
-        sentiment_analysis: Whether sentiment analysis is enabled.
-    """
+class Alert(TimestampMixin, MentionBaseModel):
+    """Represents a Mention alert."""
 
     id: str
     name: str
@@ -121,7 +102,8 @@ class CreateAlertRequest(MentionBaseModel):
     def validate_name(cls, v: str) -> str:
         """Validate alert name is not empty."""
         if not v or not v.strip():
-            raise ValueError("Alert name cannot be empty")
+            msg = "Alert name cannot be empty"
+            raise ValueError(msg)
         return v.strip()
 
     @field_validator("languages")

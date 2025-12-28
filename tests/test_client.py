@@ -131,9 +131,7 @@ class TestAlerts:
         alert_id: str,
     ) -> None:
         """Test deleting an alert."""
-        respx.delete(f"/accounts/{account_id}/alerts/{alert_id}").mock(
-            return_value=Response(204)
-        )
+        respx.delete(f"/accounts/{account_id}/alerts/{alert_id}").mock(return_value=Response(204))
 
         result = client.delete_alert(account_id, alert_id)
 
@@ -198,9 +196,9 @@ class TestMentions:
         mention_fixture: dict[str, Any],
     ) -> None:
         """Test fetching a single mention."""
-        respx.get(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}"
-        ).mock(return_value=Response(200, json=mention_fixture))
+        respx.get(f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}").mock(
+            return_value=Response(200, json=mention_fixture)
+        )
 
         mention = client.get_mention(account_id, alert_id, mention_id)
 
@@ -216,9 +214,9 @@ class TestMentions:
         mention_fixture: dict[str, Any],
     ) -> None:
         """Test curating a mention."""
-        respx.put(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}"
-        ).mock(return_value=Response(200, json=mention_fixture))
+        respx.put(f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}").mock(
+            return_value=Response(200, json=mention_fixture)
+        )
 
         request = CurateMentionRequest(
             favorite=True,
@@ -238,9 +236,9 @@ class TestMentions:
         alert_id: str,
     ) -> None:
         """Test marking all mentions as read."""
-        respx.post(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions/markallread"
-        ).mock(return_value=Response(200, json={"ok": True}))
+        respx.post(f"/accounts/{account_id}/alerts/{alert_id}/mentions/markallread").mock(
+            return_value=Response(200, json={"ok": True})
+        )
 
         result = client.mark_all_mentions_read(account_id, alert_id)
 

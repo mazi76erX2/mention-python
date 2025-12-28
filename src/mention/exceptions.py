@@ -29,9 +29,7 @@ class MentionAPIError(MentionError):
         status_code: int,
         response_body: dict[str, Any] | str | None = None,
     ) -> None:
-        super().__init__(
-            message, details={"status_code": status_code, "response": response_body}
-        )
+        super().__init__(message, details={"status_code": status_code, "response": response_body})
         self.status_code = status_code
         self.response_body = response_body
 

@@ -8,7 +8,6 @@ from typing import Any
 
 import pytest
 import respx
-from httpx import Response
 
 from mention import MentionClient, MentionConfig
 
@@ -70,7 +69,7 @@ def mock_api() -> respx.MockRouter:
 def load_fixture(name: str) -> dict[str, Any]:
     """Load a JSON fixture file."""
     fixture_path = FIXTURES_DIR / f"{name}.json"
-    with open(fixture_path) as f:
+    with fixture_path.open() as f:
         return json.load(f)
 
 
