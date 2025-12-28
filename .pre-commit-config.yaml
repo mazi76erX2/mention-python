@@ -1,39 +1,35 @@
-fail_fast: true
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+  python: python3.14
 
 repos:
-  - repo: https://github.com/ambv/black
-    rev: 22.3.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
     hooks:
-      - id: black
-        args: [--diff, --check]
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: debug-statements
 
-  - repo: local
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
     hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [python]
-        require_serial: true
-        args: [
-          --disable=missing-module-docstring,
-          --disable=missing-class-docstring,
-          --disable=missing-function-docstring,
-          --disable=unused-wildcard-import,
-          --disable=wildcard-import,
-        ]
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.902
+    rev: v1.10.0
     hooks:
       - id: mypy
-        exclude: ^tests/
-        args: [--strict, --allow-untyped-decorators, --ignore-missing-imports]
         additional_dependencies:
-          - django-stubs
-          - djangorestframework-stubs
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
-    - id: trailing-whitespace
+          - pydantic>=2.0.0
+          - httpx>=0.27.0
+          - types-requests
+        args: [--strict, --ignore-missing-imports]
+        exclude: ^tests/
