@@ -44,7 +44,8 @@ dev = [
 docs = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.1",
-    "mkdocstrings>=1.0.0",
+    "mkdocstrings[python]>=1.0.0",
+    "pymdown-extensions>=10.0",
 ]
 
 [project.scripts]
@@ -91,10 +92,14 @@ select = [
 ignore = [
     "E501",   # line too long (handled by formatter)
     "B008",   # do not perform function calls in argument defaults
+    "RUF022",  # `__all__` is not sorted - we use logical grouping
 ]
 
 [tool.ruff.lint.isort]
 known-first-party = ["mention"]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 
 [tool.ruff.format]
 quote-style = "double"
