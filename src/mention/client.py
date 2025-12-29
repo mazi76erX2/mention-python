@@ -148,9 +148,7 @@ class MentionClient:
         if response.is_success:
             return body
 
-        error_message = body.get(
-            "error", body.get("message", f"HTTP {response.status_code}")
-        )
+        error_message = body.get("error", body.get("message", f"HTTP {response.status_code}"))
 
         if response.status_code in (401, 403):
             raise MentionAuthError(
@@ -233,9 +231,7 @@ class MentionClient:
 
         raise last_exception or MentionConnectionError("Request failed after retries")
 
-    def _get(
-        self, path: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    def _get(self, path: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Make a GET request."""
         return self._request("GET", path, params=params)
 
@@ -403,9 +399,7 @@ class MentionClient:
 
         if before_date:
             params["before_date"] = (
-                before_date.isoformat()
-                if isinstance(before_date, datetime)
-                else before_date
+                before_date.isoformat() if isinstance(before_date, datetime) else before_date
             )
         if not_before_date:
             params["not_before_date"] = (
@@ -426,9 +420,7 @@ class MentionClient:
         if cursor:
             params["cursor"] = cursor
 
-        data = self._get(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions", params=params
-        )
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/mentions", params=params)
         return MentionsResponse.model_validate(data)
 
     def iter_mentions(
@@ -487,9 +479,7 @@ class MentionClient:
         Returns:
             Mention object.
         """
-        data = self._get(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}"
-        )
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}")
         return Mention.model_validate(data)
 
     def curate_mention(
@@ -624,9 +614,7 @@ class AsyncMentionClient:
         if response.is_success:
             return body
 
-        error_message = body.get(
-            "error", body.get("message", f"HTTP {response.status_code}")
-        )
+        error_message = body.get("error", body.get("message", f"HTTP {response.status_code}"))
 
         if response.status_code in (401, 403):
             raise MentionAuthError(
@@ -700,21 +688,15 @@ class AsyncMentionClient:
 
         raise last_exception or MentionConnectionError("Request failed after retries")
 
-    async def _get(
-        self, path: str, *, params: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def _get(self, path: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Make an async GET request."""
         return await self._request("GET", path, params=params)
 
-    async def _post(
-        self, path: str, *, json: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def _post(self, path: str, *, json: dict[str, Any] | None = None) -> dict[str, Any]:
         """Make an async POST request."""
         return await self._request("POST", path, json=json)
 
-    async def _put(
-        self, path: str, *, json: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
+    async def _put(self, path: str, *, json: dict[str, Any] | None = None) -> dict[str, Any]:
         """Make an async PUT request."""
         return await self._request("PUT", path, json=json)
 
@@ -792,9 +774,7 @@ class AsyncMentionClient:
 
         if before_date:
             params["before_date"] = (
-                before_date.isoformat()
-                if isinstance(before_date, datetime)
-                else before_date
+                before_date.isoformat() if isinstance(before_date, datetime) else before_date
             )
         if not_before_date:
             params["not_before_date"] = (
@@ -815,9 +795,7 @@ class AsyncMentionClient:
         if cursor:
             params["cursor"] = cursor
 
-        data = await self._get(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions", params=params
-        )
+        data = await self._get(f"/accounts/{account_id}/alerts/{alert_id}/mentions", params=params)
         return MentionsResponse.model_validate(data)
 
     async def get_mention(
@@ -827,9 +805,7 @@ class AsyncMentionClient:
         mention_id: str,
     ) -> Mention:
         """Fetch a single mention by ID."""
-        data = await self._get(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}"
-        )
+        data = await self._get(f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}")
         return Mention.model_validate(data)
 
     async def curate_mention(
@@ -848,9 +824,7 @@ class AsyncMentionClient:
 
     async def mark_all_mentions_read(self, account_id: str, alert_id: str) -> bool:
         """Mark all mentions for an alert as read."""
-        await self._post(
-            f"/accounts/{account_id}/alerts/{alert_id}/mentions/markallread"
-        )
+        await self._post(f"/accounts/{account_id}/alerts/{alert_id}/mentions/markallread")
         return True
 
     # --- Context Manager ---

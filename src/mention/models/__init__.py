@@ -8,6 +8,7 @@ from mention.models.alerts import (
     AlertQuery,
     AlertsResponse,
     CreateAlertRequest,
+    QueryType,
     UpdateAlertRequest,
 )
 from mention.models.app import AppData, Source
@@ -18,6 +19,7 @@ from mention.models.mentions import (
     Mention,
     MentionsResponse,
     Tag,
+    Tone,
 )
 
 __all__ = [
@@ -38,5 +40,7 @@ __all__ = [
     "PaginationLinks",
     "Source",
     "Tag",
+    "Tone",
     "UpdateAlertRequest",
+    "QueryType",
 ]

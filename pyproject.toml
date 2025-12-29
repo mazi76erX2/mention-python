@@ -1,5 +1,5 @@
 [project]
-name = "mention-python"
+name = "mention_python"
 version = "2.0.0"
 description = "A modern Python client for the Mention API"
 readme = "README.md"

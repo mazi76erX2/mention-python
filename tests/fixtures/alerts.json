@@ -1,0 +1,29 @@
+{
+    "alerts": [
+        {
+            "id": "test-alert-id",
+            "name": "Test Alert",
+            "query": {
+                "type": "basic",
+                "included_keywords": [
+                    "python",
+                    "api"
+                ],
+                "excluded_keywords": []
+            },
+            "languages": [
+                "en"
+            ],
+            "sources": [
+                "web",
+                "twitter"
+            ],
+            "countries": [
+                "US",
+                "GB"
+            ],
+            "followers_count": 15000,
+            "created_at": "2024-01-15T10:30:00Z"
+        }
+    ]
+}

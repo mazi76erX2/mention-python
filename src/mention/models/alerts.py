@@ -9,8 +9,7 @@ from pydantic import Field, field_validator
 
 from mention.models.base import MentionBaseModel, PaginatedResponse, TimestampMixin
 
-if TYPE_CHECKING:
-    from datetime import datetime
+from datetime import datetime
 
 
 class QueryType(str, Enum):
