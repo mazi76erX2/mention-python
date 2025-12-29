@@ -8,7 +8,8 @@ from pydantic import Field
 
 from mention.models.base import MentionBaseModel, TimestampMixin
 
-from datetime import datetime
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class AccountQuota(MentionBaseModel):
