@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 from enum import Enum
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from pydantic import Field, field_validator
 
 from mention.models.base import MentionBaseModel, PaginatedResponse, TimestampMixin
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 class Tone(str, Enum):
