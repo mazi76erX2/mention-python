@@ -18,18 +18,36 @@ from mention.exceptions import (
     MentionRateLimitError,
 )
 from mention.models import (
+    Account,
     Alert,
+    AlertPreferences,
     AlertsResponse,
     AppData,
+    AuthorsResponse,
     CreateAlertRequest,
+    CreateShareRequest,
+    CreateTagRequest,
+    CreateTaskRequest,
     CurateMentionRequest,
     Mention,
     MentionsResponse,
+    Share,
+    SharesResponse,
+    StatsPeriod,
+    StatsResponse,
+    Tag,
+    TagsResponse,
+    Task,
+    TasksResponse,
     UpdateAlertRequest,
+    UpdatePreferencesRequest,
+    UpdateShareRequest,
+    UpdateTagRequest,
+    UpdateTaskRequest,
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import AsyncIterator, Iterator
 
     from mention.config import MentionConfig
 
@@ -261,7 +279,43 @@ class MentionClient:
 
     # --- Account ---
 
-    def get_account(self, account_id: str) -> dict[str, Any]:
+    def create_account(
+        self,
+        name: str,
+        email: str,
+        password: str,
+        company: str | None = None,
+        language: str = "en",
+        timezone: str = "UTC",
+    ) -> Account:
+        """
+        Create a new account.
+
+        Args:
+            name: Account name.
+            email: Account email address.
+            password: Account password.
+            company: Company name (optional).
+            language: Language code (default: en).
+            timezone: Timezone (default: UTC).
+
+        Returns:
+            Created Account object.
+        """
+        data = self._post(
+            "/accounts",
+            json={
+                "name": name,
+                "email": email,
+                "password": password,
+                "company": company,
+                "language": language,
+                "timezone": timezone,
+            },
+        )
+        return Account.model_validate(data.get("account", data))
+
+    def get_account(self, account_id: str) -> Account:
         """
         Retrieve account information.
 
@@ -269,9 +323,71 @@ class MentionClient:
             account_id: The account ID.
 
         Returns:
-            Account data dictionary.
+            Account object.
         """
-        return self._get(f"/accounts/{account_id}")
+        data = self._get(f"/accounts/{account_id}")
+        return Account.model_validate(data.get("account", data))
+
+    def get_account_me(self) -> Account:
+        """
+        Retrieve current user's account information.
+
+        Returns:
+            Account object for the authenticated user.
+        """
+        data = self._get("/accounts/me")
+        return Account.model_validate(data.get("account", data))
+
+    def update_account(
+        self,
+        account_id: str,
+        name: str | None = None,
+        email: str | None = None,
+        company: str | None = None,
+        language: str | None = None,
+        timezone: str | None = None,
+    ) -> Account:
+        """
+        Update account information.
+
+        Args:
+            account_id: The account ID.
+            name: New account name (optional).
+            email: New email address (optional).
+            company: New company name (optional).
+            language: New language code (optional).
+            timezone: New timezone (optional).
+
+        Returns:
+            Updated Account object.
+        """
+        json_data = {}
+        if name is not None:
+            json_data["name"] = name
+        if email is not None:
+            json_data["email"] = email
+        if company is not None:
+            json_data["company"] = company
+        if language is not None:
+            json_data["language"] = language
+        if timezone is not None:
+            json_data["timezone"] = timezone
+
+        data = self._put(f"/accounts/{account_id}", json=json_data)
+        return Account.model_validate(data.get("account", data))
+
+    def delete_account(self, account_id: str) -> bool:
+        """
+        Delete an account.
+
+        Args:
+            account_id: The account ID.
+
+        Returns:
+            True if deletion was successful.
+        """
+        self._delete(f"/accounts/{account_id}")
+        return True
 
     # --- Alerts ---
 
@@ -357,6 +473,34 @@ class MentionClient:
             True if deletion was successful.
         """
         self._delete(f"/accounts/{account_id}/alerts/{alert_id}")
+        return True
+
+    def pause_alert(self, account_id: str, alert_id: str) -> bool:
+        """
+        Pause an alert (stop monitoring).
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+
+        Returns:
+            True if pause was successful.
+        """
+        self._post(f"/accounts/{account_id}/alerts/{alert_id}/pause")
+        return True
+
+    def unpause_alert(self, account_id: str, alert_id: str) -> bool:
+        """
+        Unpause an alert (resume monitoring).
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+
+        Returns:
+            True if unpause was successful.
+        """
+        self._post(f"/accounts/{account_id}/alerts/{alert_id}/unpause")
         return True
 
     # --- Mentions ---
@@ -520,6 +664,480 @@ class MentionClient:
         """
         self._post(f"/accounts/{account_id}/alerts/{alert_id}/mentions/markallread")
         return True
+
+    def get_mention_children(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+    ) -> MentionsResponse:
+        """
+        Fetch child mentions (replies, comments) of a mention.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            mention_id: The mention ID.
+
+        Returns:
+            MentionsResponse containing child mentions.
+        """
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/children")
+        return MentionsResponse.model_validate(data)
+
+    def stream_mentions(
+        self,
+        account_id: str,
+        alert_id: str,
+        *,
+        since: datetime | str | None = None,
+    ) -> Iterator[Mention]:
+        """
+        Stream mentions in real-time.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            since: Start streaming from this timestamp.
+
+        Yields:
+            Mention objects as they arrive.
+        """
+        params: dict[str, Any] = {}
+        if since:
+            params["since"] = since.isoformat() if isinstance(since, datetime) else since
+
+        # This is a long-polling endpoint that returns mentions as they arrive
+        while True:
+            data = self._get(
+                f"/accounts/{account_id}/alerts/{alert_id}/mentions/stream",
+                params=params,
+            )
+            response = MentionsResponse.model_validate(data)
+
+            for mention in response.mentions:
+                yield mention
+                # Update the since parameter for next request
+                if mention.published_at:
+                    params["since"] = mention.published_at.isoformat()
+
+    # --- Tasks ---
+
+    def get_tasks(self, account_id: str, alert_id: str) -> TasksResponse:
+        """
+        Fetch all tasks for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+
+        Returns:
+            TasksResponse containing list of tasks.
+        """
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/tasks")
+        return TasksResponse.model_validate(data)
+
+    def get_mention_tasks(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+    ) -> TasksResponse:
+        """
+        Fetch all tasks for a specific mention.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            mention_id: The mention ID.
+
+        Returns:
+            TasksResponse containing list of tasks.
+        """
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks")
+        return TasksResponse.model_validate(data)
+
+    def get_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        task_id: str,
+    ) -> Task:
+        """
+        Fetch a single task by ID.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            mention_id: The mention ID.
+            task_id: The task ID.
+
+        Returns:
+            Task object.
+        """
+        data = self._get(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks/{task_id}"
+        )
+        return Task.model_validate(data.get("task", data))
+
+    def create_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        request: CreateTaskRequest,
+    ) -> Task:
+        """
+        Create a new task for a mention.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            mention_id: The mention ID.
+            request: Task creation request.
+
+        Returns:
+            Created Task object.
+        """
+        data = self._post(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Task.model_validate(data.get("task", data))
+
+    def update_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        task_id: str,
+        request: UpdateTaskRequest,
+    ) -> Task:
+        """
+        Update an existing task.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            mention_id: The mention ID.
+            task_id: The task ID.
+            request: Task update request.
+
+        Returns:
+            Updated Task object.
+        """
+        data = self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks/{task_id}",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Task.model_validate(data.get("task", data))
+
+    def delete_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        task_id: str,
+    ) -> bool:
+        """
+        Delete a task.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            mention_id: The mention ID.
+            task_id: The task ID.
+
+        Returns:
+            True if deletion was successful.
+        """
+        self._delete(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks/{task_id}"
+        )
+        return True
+
+    # --- Tags ---
+
+    def get_tags(self, account_id: str, alert_id: str) -> TagsResponse:
+        """
+        Fetch all tags for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+
+        Returns:
+            TagsResponse containing list of tags.
+        """
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/tags")
+        return TagsResponse.model_validate(data)
+
+    def create_tag(
+        self,
+        account_id: str,
+        alert_id: str,
+        request: CreateTagRequest,
+    ) -> Tag:
+        """
+        Create a new tag for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            request: Tag creation request.
+
+        Returns:
+            Created Tag object.
+        """
+        data = self._post(
+            f"/accounts/{account_id}/alerts/{alert_id}/tags",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Tag.model_validate(data.get("tag", data))
+
+    def update_tag(
+        self,
+        account_id: str,
+        alert_id: str,
+        tag_id: str,
+        request: UpdateTagRequest,
+    ) -> Tag:
+        """
+        Update an existing tag.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            tag_id: The tag ID.
+            request: Tag update request.
+
+        Returns:
+            Updated Tag object.
+        """
+        data = self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/tags/{tag_id}",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Tag.model_validate(data.get("tag", data))
+
+    def delete_tag(self, account_id: str, alert_id: str, tag_id: str) -> bool:
+        """
+        Delete a tag.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            tag_id: The tag ID.
+
+        Returns:
+            True if deletion was successful.
+        """
+        self._delete(f"/accounts/{account_id}/alerts/{alert_id}/tags/{tag_id}")
+        return True
+
+    # --- Shares ---
+
+    def get_shares(self, account_id: str, alert_id: str) -> SharesResponse:
+        """
+        Fetch all shares for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+
+        Returns:
+            SharesResponse containing list of shares.
+        """
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/shares")
+        return SharesResponse.model_validate(data)
+
+    def get_share(self, account_id: str, alert_id: str, share_id: str) -> Share:
+        """
+        Fetch a single share by ID.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            share_id: The share ID.
+
+        Returns:
+            Share object.
+        """
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/shares/{share_id}")
+        return Share.model_validate(data.get("share", data))
+
+    def create_share(
+        self,
+        account_id: str,
+        alert_id: str,
+        request: CreateShareRequest,
+    ) -> Share:
+        """
+        Create a new share for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            request: Share creation request.
+
+        Returns:
+            Created Share object.
+        """
+        data = self._post(
+            f"/accounts/{account_id}/alerts/{alert_id}/shares",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Share.model_validate(data.get("share", data))
+
+    def update_share(
+        self,
+        account_id: str,
+        alert_id: str,
+        share_id: str,
+        request: UpdateShareRequest,
+    ) -> Share:
+        """
+        Update an existing share.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            share_id: The share ID.
+            request: Share update request.
+
+        Returns:
+            Updated Share object.
+        """
+        data = self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/shares/{share_id}",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Share.model_validate(data.get("share", data))
+
+    def delete_share(self, account_id: str, alert_id: str, share_id: str) -> bool:
+        """
+        Delete a share.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            share_id: The share ID.
+
+        Returns:
+            True if deletion was successful.
+        """
+        self._delete(f"/accounts/{account_id}/alerts/{alert_id}/shares/{share_id}")
+        return True
+
+    # --- Preferences ---
+
+    def get_preferences(self, account_id: str, alert_id: str) -> AlertPreferences:
+        """
+        Fetch preferences for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+
+        Returns:
+            AlertPreferences object.
+        """
+        data = self._get(f"/accounts/{account_id}/alerts/{alert_id}/preferences")
+        return AlertPreferences.model_validate(data.get("preferences", data))
+
+    def update_preferences(
+        self,
+        account_id: str,
+        alert_id: str,
+        request: UpdatePreferencesRequest,
+    ) -> AlertPreferences:
+        """
+        Update preferences for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            request: Preferences update request.
+
+        Returns:
+            Updated AlertPreferences object.
+        """
+        data = self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/preferences",
+            json=request.model_dump(exclude_none=True),
+        )
+        return AlertPreferences.model_validate(data.get("preferences", data))
+
+    # --- Authors ---
+
+    def get_authors(
+        self,
+        account_id: str,
+        alert_id: str,
+        *,
+        limit: int = 100,
+        sort_by: str | None = None,
+    ) -> AuthorsResponse:
+        """
+        Fetch authors/influencers for an alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            limit: Maximum number of authors to return.
+            sort_by: Sort field (mentions, reach, influence, etc.).
+
+        Returns:
+            AuthorsResponse containing list of authors.
+        """
+        params: dict[str, Any] = {"limit": limit}
+        if sort_by:
+            params["sort_by"] = sort_by
+
+        data = self._get(
+            f"/accounts/{account_id}/alerts/{alert_id}/authors",
+            params=params,
+        )
+        return AuthorsResponse.model_validate(data)
+
+    # --- Statistics ---
+
+    def get_stats(
+        self,
+        account_id: str,
+        alert_id: str | None = None,
+        *,
+        from_date: datetime | str | None = None,
+        to_date: datetime | str | None = None,
+        period: StatsPeriod = StatsPeriod.DAY,
+    ) -> StatsResponse:
+        """
+        Fetch statistics for an account or alert.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID (optional, if None gets account-level stats).
+            from_date: Start date for statistics period.
+            to_date: End date for statistics period.
+            period: Time grouping period (hour, day, week, month).
+
+        Returns:
+            StatsResponse containing statistics data.
+        """
+        params: dict[str, Any] = {"period": period.value}
+
+        if from_date:
+            params["from"] = from_date.isoformat() if isinstance(from_date, datetime) else from_date
+        if to_date:
+            params["to"] = to_date.isoformat() if isinstance(to_date, datetime) else to_date
+
+        path = f"/accounts/{account_id}/stats"
+        if alert_id:
+            path = f"/accounts/{account_id}/alerts/{alert_id}/stats"
+
+        data = self._get(path, params=params)
+        return StatsResponse.model_validate(data)
 
     # --- Context Manager ---
 
@@ -826,6 +1444,355 @@ class AsyncMentionClient:
         """Mark all mentions for an alert as read."""
         await self._post(f"/accounts/{account_id}/alerts/{alert_id}/mentions/markallread")
         return True
+
+    async def get_mention_children(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+    ) -> MentionsResponse:
+        """Fetch child mentions (replies, comments) of a mention."""
+        data = await self._get(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/children"
+        )
+        return MentionsResponse.model_validate(data)
+
+    async def stream_mentions(
+        self,
+        account_id: str,
+        alert_id: str,
+        *,
+        since: datetime | str | None = None,
+    ) -> AsyncIterator[Mention]:
+        """
+        Stream mentions in real-time.
+
+        Args:
+            account_id: The account ID.
+            alert_id: The alert ID.
+            since: Start streaming from this timestamp.
+
+        Yields:
+            Mention objects as they arrive.
+        """
+        params: dict[str, Any] = {}
+        if since:
+            params["since"] = since.isoformat() if isinstance(since, datetime) else since
+
+        # This is a long-polling endpoint that returns mentions as they arrive
+        while True:
+            data = await self._get(
+                f"/accounts/{account_id}/alerts/{alert_id}/mentions/stream",
+                params=params,
+            )
+            response = MentionsResponse.model_validate(data)
+
+            for mention in response.mentions:
+                yield mention
+                # Update the since parameter for next request
+                if mention.published_at:
+                    params["since"] = mention.published_at.isoformat()
+
+    # --- Account ---
+
+    async def create_account(
+        self,
+        name: str,
+        email: str,
+        password: str,
+        company: str | None = None,
+        language: str = "en",
+        timezone: str = "UTC",
+    ) -> Account:
+        """Create a new account."""
+        data = await self._post(
+            "/accounts",
+            json={
+                "name": name,
+                "email": email,
+                "password": password,
+                "company": company,
+                "language": language,
+                "timezone": timezone,
+            },
+        )
+        return Account.model_validate(data.get("account", data))
+
+    async def get_account(self, account_id: str) -> Account:
+        """Fetch a single account by ID."""
+        data = await self._get(f"/accounts/{account_id}")
+        return Account.model_validate(data.get("account", data))
+
+    async def get_account_me(self) -> Account:
+        """Fetch the current user's account."""
+        data = await self._get("/accounts/me")
+        return Account.model_validate(data.get("account", data))
+
+    async def update_account(
+        self,
+        account_id: str,
+        name: str | None = None,
+        email: str | None = None,
+        company: str | None = None,
+        language: str | None = None,
+        timezone: str | None = None,
+    ) -> Account:
+        """Update an existing account."""
+        json_data = {}
+        if name is not None:
+            json_data["name"] = name
+        if email is not None:
+            json_data["email"] = email
+        if company is not None:
+            json_data["company"] = company
+        if language is not None:
+            json_data["language"] = language
+        if timezone is not None:
+            json_data["timezone"] = timezone
+
+        data = await self._put(f"/accounts/{account_id}", json=json_data)
+        return Account.model_validate(data.get("account", data))
+
+    async def delete_account(self, account_id: str) -> bool:
+        """Delete an account."""
+        await self._delete(f"/accounts/{account_id}")
+        return True
+
+    # --- Alert Pause/Unpause ---
+
+    async def pause_alert(self, account_id: str, alert_id: str) -> bool:
+        """Pause an alert (stop monitoring)."""
+        await self._post(f"/accounts/{account_id}/alerts/{alert_id}/pause")
+        return True
+
+    async def unpause_alert(self, account_id: str, alert_id: str) -> bool:
+        """Unpause an alert (resume monitoring)."""
+        await self._post(f"/accounts/{account_id}/alerts/{alert_id}/unpause")
+        return True
+
+    # --- Tasks ---
+
+    async def get_tasks(self, account_id: str, alert_id: str) -> TasksResponse:
+        """Fetch all tasks for an alert."""
+        data = await self._get(f"/accounts/{account_id}/alerts/{alert_id}/tasks")
+        return TasksResponse.model_validate(data)
+
+    async def get_mention_tasks(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+    ) -> TasksResponse:
+        """Fetch all tasks for a specific mention."""
+        data = await self._get(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks"
+        )
+        return TasksResponse.model_validate(data)
+
+    async def get_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        task_id: str,
+    ) -> Task:
+        """Fetch a single task by ID."""
+        data = await self._get(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks/{task_id}"
+        )
+        return Task.model_validate(data.get("task", data))
+
+    async def create_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        request: CreateTaskRequest,
+    ) -> Task:
+        """Create a new task for a mention."""
+        data = await self._post(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Task.model_validate(data.get("task", data))
+
+    async def update_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        task_id: str,
+        request: UpdateTaskRequest,
+    ) -> Task:
+        """Update an existing task."""
+        data = await self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks/{task_id}",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Task.model_validate(data.get("task", data))
+
+    async def delete_task(
+        self,
+        account_id: str,
+        alert_id: str,
+        mention_id: str,
+        task_id: str,
+    ) -> bool:
+        """Delete a task."""
+        await self._delete(
+            f"/accounts/{account_id}/alerts/{alert_id}/mentions/{mention_id}/tasks/{task_id}"
+        )
+        return True
+
+    # --- Tags ---
+
+    async def get_tags(self, account_id: str, alert_id: str) -> TagsResponse:
+        """Fetch all tags for an alert."""
+        data = await self._get(f"/accounts/{account_id}/alerts/{alert_id}/tags")
+        return TagsResponse.model_validate(data)
+
+    async def create_tag(
+        self,
+        account_id: str,
+        alert_id: str,
+        request: CreateTagRequest,
+    ) -> Tag:
+        """Create a new tag for an alert."""
+        data = await self._post(
+            f"/accounts/{account_id}/alerts/{alert_id}/tags",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Tag.model_validate(data.get("tag", data))
+
+    async def update_tag(
+        self,
+        account_id: str,
+        alert_id: str,
+        tag_id: str,
+        request: UpdateTagRequest,
+    ) -> Tag:
+        """Update an existing tag."""
+        data = await self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/tags/{tag_id}",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Tag.model_validate(data.get("tag", data))
+
+    async def delete_tag(self, account_id: str, alert_id: str, tag_id: str) -> bool:
+        """Delete a tag."""
+        await self._delete(f"/accounts/{account_id}/alerts/{alert_id}/tags/{tag_id}")
+        return True
+
+    # --- Shares ---
+
+    async def get_shares(self, account_id: str, alert_id: str) -> SharesResponse:
+        """Fetch all shares for an alert."""
+        data = await self._get(f"/accounts/{account_id}/alerts/{alert_id}/shares")
+        return SharesResponse.model_validate(data)
+
+    async def get_share(self, account_id: str, alert_id: str, share_id: str) -> Share:
+        """Fetch a single share by ID."""
+        data = await self._get(f"/accounts/{account_id}/alerts/{alert_id}/shares/{share_id}")
+        return Share.model_validate(data.get("share", data))
+
+    async def create_share(
+        self,
+        account_id: str,
+        alert_id: str,
+        request: CreateShareRequest,
+    ) -> Share:
+        """Create a new share for an alert."""
+        data = await self._post(
+            f"/accounts/{account_id}/alerts/{alert_id}/shares",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Share.model_validate(data.get("share", data))
+
+    async def update_share(
+        self,
+        account_id: str,
+        alert_id: str,
+        share_id: str,
+        request: UpdateShareRequest,
+    ) -> Share:
+        """Update an existing share."""
+        data = await self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/shares/{share_id}",
+            json=request.model_dump(exclude_none=True),
+        )
+        return Share.model_validate(data.get("share", data))
+
+    async def delete_share(self, account_id: str, alert_id: str, share_id: str) -> bool:
+        """Delete a share."""
+        await self._delete(f"/accounts/{account_id}/alerts/{alert_id}/shares/{share_id}")
+        return True
+
+    # --- Preferences ---
+
+    async def get_preferences(self, account_id: str, alert_id: str) -> AlertPreferences:
+        """Fetch preferences for an alert."""
+        data = await self._get(f"/accounts/{account_id}/alerts/{alert_id}/preferences")
+        return AlertPreferences.model_validate(data.get("preferences", data))
+
+    async def update_preferences(
+        self,
+        account_id: str,
+        alert_id: str,
+        request: UpdatePreferencesRequest,
+    ) -> AlertPreferences:
+        """Update preferences for an alert."""
+        data = await self._put(
+            f"/accounts/{account_id}/alerts/{alert_id}/preferences",
+            json=request.model_dump(exclude_none=True),
+        )
+        return AlertPreferences.model_validate(data.get("preferences", data))
+
+    # --- Authors ---
+
+    async def get_authors(
+        self,
+        account_id: str,
+        alert_id: str,
+        *,
+        limit: int = 100,
+        sort_by: str | None = None,
+    ) -> AuthorsResponse:
+        """Fetch authors/influencers for an alert."""
+        params: dict[str, Any] = {"limit": limit}
+        if sort_by:
+            params["sort_by"] = sort_by
+
+        data = await self._get(
+            f"/accounts/{account_id}/alerts/{alert_id}/authors",
+            params=params,
+        )
+        return AuthorsResponse.model_validate(data)
+
+    # --- Statistics ---
+
+    async def get_stats(
+        self,
+        account_id: str,
+        alert_id: str | None = None,
+        *,
+        from_date: datetime | str | None = None,
+        to_date: datetime | str | None = None,
+        period: StatsPeriod = StatsPeriod.DAY,
+    ) -> StatsResponse:
+        """Fetch statistics for an account or alert."""
+        params: dict[str, Any] = {"period": period.value}
+
+        if from_date:
+            params["from"] = from_date.isoformat() if isinstance(from_date, datetime) else from_date
+        if to_date:
+            params["to"] = to_date.isoformat() if isinstance(to_date, datetime) else to_date
+
+        path = f"/accounts/{account_id}/stats"
+        if alert_id:
+            path = f"/accounts/{account_id}/alerts/{alert_id}/stats"
+
+        data = await self._get(path, params=params)
+        return StatsResponse.model_validate(data)
 
     # --- Context Manager ---
 
