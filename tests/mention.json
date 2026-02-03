@@ -1,0 +1,38 @@
+{
+    "id": "mention-12345",
+    "title": "Nando's launches their own food ordering app",
+    "description": "Nando's has launched their own app that will allow people to order their favourite meal from the comfort of their own home. The app features easy ordering and delivery tracking.",
+    "description_short": "Nando's has launched their own app...",
+    "original_url": "https://www.example.com/nandos-app-launch",
+    "source_name": "Example News",
+    "source_type": "web",
+    "tone": "positive",
+    "favorite": false,
+    "read": false,
+    "trashed": false,
+    "published_at": "2024-06-15T09:30:00Z",
+    "created_at": "2024-06-15T10:00:00Z",
+    "reach": 25000,
+    "language": "en",
+    "country": "ZA",
+    "author": {
+        "id": "author-789",
+        "name": "Tech Reporter",
+        "username": "techreporter",
+        "profile_url": "https://twitter.com/techreporter",
+        "followers_count": 15000,
+        "influence_score": 68.5
+    },
+    "tags": [
+        {
+            "id": "tag-important",
+            "name": "Important",
+            "color": "#ff0000"
+        }
+    ],
+    "engagement": {
+        "likes": 150,
+        "shares": 45,
+        "comments": 23
+    }
+}

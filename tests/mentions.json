@@ -1,0 +1,54 @@
+{
+    "mentions": [
+        {
+            "id": "mention-001",
+            "title": "Great product announcement",
+            "description": "The company announced a new product line today.",
+            "original_url": "https://example.com/news/1",
+            "source_name": "Tech Blog",
+            "source_type": "blog",
+            "tone": "positive",
+            "favorite": true,
+            "read": true,
+            "published_at": "2024-06-20T10:00:00Z",
+            "reach": 5000
+        },
+        {
+            "id": "mention-002",
+            "title": "Customer feedback on Twitter",
+            "description": "A customer shared their experience with our service.",
+            "original_url": "https://twitter.com/user/status/123",
+            "source_name": "Twitter",
+            "source_type": "twitter",
+            "tone": "neutral",
+            "favorite": false,
+            "read": false,
+            "published_at": "2024-06-20T09:30:00Z",
+            "reach": 1200,
+            "author": {
+                "id": "tw-user-123",
+                "name": "Happy Customer",
+                "username": "happycustomer",
+                "followers_count": 500
+            }
+        },
+        {
+            "id": "mention-003",
+            "title": "Industry analysis report",
+            "description": "Analysts discuss market trends and company positioning.",
+            "original_url": "https://example.com/reports/analysis",
+            "source_name": "Market Watch",
+            "source_type": "news",
+            "tone": "positive",
+            "favorite": false,
+            "read": true,
+            "published_at": "2024-06-19T15:00:00Z",
+            "reach": 50000
+        }
+    ],
+    "_links": {
+        "more": "https://api.mention.net/api/accounts/123/alerts/456/mentions?cursor=abc123",
+        "pull": null
+    },
+    "total": 150
+}

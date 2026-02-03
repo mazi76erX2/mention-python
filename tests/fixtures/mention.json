@@ -1,0 +1,19 @@
+{
+  "mention": {
+    "id": "mention-1",
+    "title": "Test Mention",
+    "description": "A test mention",
+    "original_url": "https://example.com/post",
+    "source_name": "twitter",
+    "tone": "positive",
+    "favorite": false,
+    "read": true,
+    "trashed": false,
+    "author": {
+      "id": "author-1",
+      "name": "John Doe",
+      "username": "johndoe",
+      "followers_count": 1000
+    }
+  }
+}

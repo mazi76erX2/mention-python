@@ -1,0 +1,26 @@
+{
+  "mentions": [
+    {
+      "id": "mention-1",
+      "title": "Test Mention 1",
+      "description": "First test mention",
+      "original_url": "https://example.com/1",
+      "source_name": "twitter",
+      "tone": "positive",
+      "favorite": false,
+      "read": false,
+      "trashed": false
+    },
+    {
+      "id": "mention-2",
+      "title": "Test Mention 2",
+      "description": "Second test mention",
+      "original_url": "https://example.com/2",
+      "source_name": "web",
+      "tone": "neutral",
+      "favorite": true,
+      "read": true,
+      "trashed": false
+    }
+  ]
+}

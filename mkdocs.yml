@@ -1,0 +1,90 @@
+site_name: Mention-Python
+site_url: https://mention-python.readthedocs.io
+site_description: A modern, typed Python client for the Mention API
+site_author: Xolani Mazibuko
+
+repo_name: mazi76erX2/mention-python
+repo_url: https://github.com/mazi76erX2/mention-python
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2018 - 2025 Xolani Mazibuko
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/mazi76erX2/mention-python
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/mention-python/
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: installation.md
+      - Quick Start: quickstart.md
+      - Configuration: configuration.md
+  - User Guide:
+      - Working with Alerts: guides/alerts.md
+      - Working with Mentions: guides/mentions.md
+      - Error Handling: guides/errors.md
+      - Async Usage: guides/async.md
+  - CLI Reference: cli.md
+  - API Reference: api-reference.md
+  - Changelog: changelog.md
