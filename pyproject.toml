@@ -6,7 +6,7 @@ readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Xolani Mazibuko", email = "mazi76erx@gmail.com" }]
 maintainers = [{ name = "Xolani Mazibuko", email = "mazi76erx@gmail.com" }]
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 keywords = ["mention", "api", "social-media", "monitoring", "web-monitoring"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -35,7 +35,6 @@ dev = [
     "pytest>=8.0.0",
     "pytest-cov>=5.0.0",
     "pytest-asyncio>=0.23.0",
-    "pytest-httpx>=0.30.0",
     "mypy>=1.10.0",
     "ruff>=0.5.0",
     "pre-commit>=3.7.0",
